@@ -1,13 +1,17 @@
+"use client";
 import React from "react";
+import { motion } from "framer-motion";
 
 const Card = ({
   size = "lg",
   className,
   icon,
+  motionProps = {},
 }: {
   size?: "sm" | "md" | "lg";
   className?: string;
   icon: React.ReactNode;
+  motionProps?: any;
 }) => {
   const sizes = {
     sm: {
@@ -24,8 +28,9 @@ const Card = ({
     },
   };
   return (
-    <div
-      className={`${className} absolute flex justify-center items-center inset-x-0`}
+    <motion.div
+      {...motionProps}
+      className={`${className} w-min absolute flex justify-center inset-x-0  m-auto`}
     >
       <div
         className={`flex flex-col bg-white rounded-2xl overflow-hidden aspect-[12/14] ${sizes[size].card} shadow-md relative `}
@@ -37,7 +42,7 @@ const Card = ({
           <div className={sizes[size].icon}>{icon}</div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

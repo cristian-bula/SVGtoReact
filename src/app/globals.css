@@ -20,3 +20,36 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Animaciones para el centro */
+@keyframes fadeInCenter {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animación para los cards en los extremos */
+@keyframes moveOutside {
+  0% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(var(--offset, 0));
+  }
+}
+
+/* Clases de animación */
+.animate-center {
+  animation: fadeInCenter 0.6s ease-out forwards;
+}
+
+.animate-outside {
+  animation: moveOutside 0.8s ease-out forwards;
+}
