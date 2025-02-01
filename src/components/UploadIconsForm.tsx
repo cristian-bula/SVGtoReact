@@ -16,9 +16,9 @@ export default function UploadIconsForm() {
     isTypescript: boolean;
     copyIndexToClipboard: boolean;
   }>({
-    generateIndex: false,
     isTypescript: true,
-    copyIndexToClipboard: true,
+    generateIndex: true,
+    copyIndexToClipboard: false,
   });
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,7 +44,7 @@ export default function UploadIconsForm() {
       await navigator.clipboard.writeText(indexContent);
       toast.success(`${index} copied to clipboard`);
     } catch (error) {
-      console.error(error)
+      console.error(error);
       toast.error(`Failed to copy ${index} `);
     }
   };
@@ -57,7 +57,7 @@ export default function UploadIconsForm() {
       const updatedBlob = await zip.generateAsync({ type: "blob" });
       return updatedBlob;
     } catch (error) {
-      console.error(error)
+      console.error(error);
       toast.error("Failed to delete index");
     }
   };
@@ -185,22 +185,22 @@ export default function UploadIconsForm() {
         <label className="flex items-center space-x-2">
           <input
             type="checkbox"
-            name="copyIndexToClipboard"
-            checked={options.copyIndexToClipboard}
-            onChange={handleOptionChange}
-            className="form-checkbox h-5 w-5 accent-primary"
-          />
-          <span>Copy Index to Clipboard</span>
-        </label>
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
             name="generateIndex"
             checked={options.generateIndex}
             onChange={handleOptionChange}
             className="form-checkbox h-5 w-5 accent-primary"
           />
           <span>Generate Index File</span>
+        </label>
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            name="copyIndexToClipboard"
+            checked={options.copyIndexToClipboard}
+            onChange={handleOptionChange}
+            className="form-checkbox h-5 w-5 accent-primary"
+          />
+          <span>Copy Index to Clipboard</span>
         </label>
       </div>
     </form>
