@@ -44,7 +44,8 @@ export default function UploadIconsForm() {
       await navigator.clipboard.writeText(indexContent);
       toast.success(`${index} copied to clipboard`);
     } catch (error) {
-      toast.error(`Failed to copy ${index}`);
+      console.error(error)
+      toast.error(`Failed to copy ${index} `);
     }
   };
 
@@ -56,6 +57,7 @@ export default function UploadIconsForm() {
       const updatedBlob = await zip.generateAsync({ type: "blob" });
       return updatedBlob;
     } catch (error) {
+      console.error(error)
       toast.error("Failed to delete index");
     }
   };

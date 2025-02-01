@@ -58,14 +58,13 @@ export async function POST(req: NextRequest) {
   const options = JSON.parse(formData.get("options") as string);
   const isTypescript = options?.isTypescript;
 
-  const components = {};
+  const components: Record<string, string> = {};
 
   for (const file of files) {
     if (file.name.endsWith(".svg")) {
       const rawContent = await file.text();
       const { data } = optimize(rawContent, config as any);
       const componentCode = await processSvgFile(file.name, data, isTypescript);
-      // @ts-ignore
       components[file.name] = componentCode;
     }
   }
