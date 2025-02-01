@@ -1,24 +1,63 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { v4 as uuidv4 } from "uuid";
 import {
   MaterialSymbolsSend,
   MaterialSymbolsUpload,
   TablerTrash,
 } from "./icons";
+import JSZip from "jszip";
 
 export default function UploadIconsForm() {
   const [files, setFiles] = useState<FileList | null>(null);
-  const userId = useRef("");
-
-  useEffect(() => {
-    userId.current = uuidv4();
-  }, []);
+  const [options, setOptions] = useState<{
+    generateIndex: boolean;
+    isTypescript: boolean;
+    copyIndexToClipboard: boolean;
+  }>({
+    generateIndex: false,
+    isTypescript: true,
+    copyIndexToClipboard: true,
+  });
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFiles(event.target.files);
+  };
+
+  const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = event.target;
+    setOptions((prevOptions) => ({
+      ...prevOptions,
+      [name]: checked,
+    }));
+  };
+
+  const copyToClipboard = async (blob: Blob) => {
+    const index = options.isTypescript ? "index.ts" : "index.js";
+    try {
+      const zip = await JSZip.loadAsync(blob);
+      const indexFile = zip.file(index);
+      if (!indexFile) throw new Error(`${index} not found in zip`);
+
+      const indexContent = await indexFile.async("text");
+      await navigator.clipboard.writeText(indexContent);
+      toast.success(`${index} copied to clipboard`);
+    } catch (error) {
+      toast.error(`Failed to copy ${index}`);
+    }
+  };
+
+  const deleteIndex = async (blob: Blob) => {
+    const index = options.isTypescript ? "index.ts" : "index.js";
+    try {
+      const zip = await JSZip.loadAsync(blob);
+      zip.remove(index);
+      const updatedBlob = await zip.generateAsync({ type: "blob" });
+      return updatedBlob;
+    } catch (error) {
+      toast.error("Failed to delete index");
+    }
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -30,19 +69,26 @@ export default function UploadIconsForm() {
     }
 
     const formData = new FormData();
-    formData.append("userId", userId.current);
     Array.from(files).forEach((file) => formData.append("files", file));
+    formData.append("options", JSON.stringify(options));
+
     const toastMsg = toast.loading("Processing files...");
     try {
       const response = await fetch("/api/icons", {
         method: "POST",
         body: formData,
       });
-      await new Promise((res) => setTimeout(res, 500));
 
       if (!response.ok) throw new Error("Failed to process files");
-
-      const blob = await response.blob();
+      let blob = await response.blob();
+      if (options.copyIndexToClipboard) {
+        await copyToClipboard(blob);
+      }
+      if (!options.generateIndex) {
+        const updatedBlob = await deleteIndex(blob);
+        if (!updatedBlob) throw new Error("Failed to delete index");
+        blob = updatedBlob;
+      }
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -52,6 +98,7 @@ export default function UploadIconsForm() {
       a.remove();
       window.URL.revokeObjectURL(url);
       toast.dismiss(toastMsg);
+      setFiles(null);
       toast.success("Files processed successfully");
     } catch (error) {
       console.error("Error processing files:", error);
@@ -64,9 +111,9 @@ export default function UploadIconsForm() {
     <form
       onSubmit={handleSubmit}
       encType="multipart/form-data"
-      className="flex justify-center items-center mt-10"
+      className="flex flex-col justify-center items-center mt-10"
     >
-      <div className="flex items-center justify-between bg-white max-w-xl w-full rounded-full px-6 py-3 shadow-lg text-sm md:text-base gap-8 md:gap-0">
+      <div className="flex items-center justify-between bg-white max-w-2xl w-full rounded-full px-6 py-3 shadow-lg text-sm md:text-base gap-8 md:gap-0">
         <label
           htmlFor="fileInput"
           className="flex items-center justify-center w-full md:w-auto px-4 py-2 bg-[#eef1ff] text-primary font-semibold rounded-full cursor-pointer hover:bg-[#cdd3ff] transition duration-200 ease-in-out relative"
@@ -121,6 +168,38 @@ export default function UploadIconsForm() {
             </span>
           </button>
         </div>
+      </div>
+      <div className="mt-4 w-full max-w-2xl bg-white p-6 rounded-lg shadow-lg space-y-2">
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            name="isTypescript"
+            checked={options.isTypescript}
+            onChange={handleOptionChange}
+            className="form-checkbox h-5 w-5 accent-primary"
+          />
+          <span>Use Typescript</span>
+        </label>
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            name="copyIndexToClipboard"
+            checked={options.copyIndexToClipboard}
+            onChange={handleOptionChange}
+            className="form-checkbox h-5 w-5 accent-primary"
+          />
+          <span>Copy Index to Clipboard</span>
+        </label>
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            name="generateIndex"
+            checked={options.generateIndex}
+            onChange={handleOptionChange}
+            className="form-checkbox h-5 w-5 accent-primary"
+          />
+          <span>Generate Index File</span>
+        </label>
       </div>
     </form>
   );

@@ -10,17 +10,15 @@
   },
   "dependencies": {
     "@types/adm-zip": "^0.5.5",
-    "@types/uuid": "^10.0.0",
     "adm-zip": "^0.5.16",
     "camelcase": "^8.0.0",
     "framer-motion": "12.0.0-alpha.0",
+    "jszip": "^3.10.1",
     "next": "15.0.1",
     "react": "19.0.0-rc-69d4b800-20241021",
     "react-dom": "19.0.0-rc-69d4b800-20241021",
     "react-hot-toast": "^2.4.1",
-    "rmrf": "^2.0.4",
-    "svgo": "^3.3.2",
-    "uuid": "^10.0.0"
+    "svgo": "^3.3.2"
   },
   "devDependencies": {
     "@types/node": "^20",
